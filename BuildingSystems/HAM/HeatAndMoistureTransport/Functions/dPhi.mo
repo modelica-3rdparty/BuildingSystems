@@ -73,6 +73,7 @@ First implementation.
 </li>
 <li>September 15, 2024, by Christoph Nytsch-Geusen:<br/>
 Use of the function BuildingSystems.Utilities.Math.Functions.interpolate.
+</li>
 <li>July 16, 2025, by Christoph Nytsch-Geusen:<br/>
 Use of monotonicity in the splineDerivatives function.
 </li>
