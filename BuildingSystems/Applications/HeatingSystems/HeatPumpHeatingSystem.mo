@@ -70,14 +70,14 @@ model HeatPumpHeatingSystem
   Fluid.HeatPumps.Carnot_TCon heaPum(
     redeclare package Medium1 = Medium1,
     redeclare package Medium2 = Medium2,
-    QCon_flow_nominal=5000,
+    QCon_flow_nominal=15000,
     use_eta_Carnot_nominal=false,
     COP_nominal=3.0,
     dp1_nominal=1000,
     dp2_nominal=1000,
     TCon_nominal=308.15,
     TEva_nominal=275.15,
-    QCon_flow_max=5000)
+    QCon_flow_max=15000)
     "Heat pump model"
     annotation (Placement(transformation(extent={{12,-76},{-8,-56}})));
   BuildingSystems.Fluid.HeatExchangers.Radiators.RadiatorEN442_2 rad(
@@ -85,15 +85,15 @@ model HeatPumpHeatingSystem
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal=m_flow_nominal,
     dp_nominal=1000.0,
-    Q_flow_nominal=12000.0,
+    Q_flow_nominal=20000.0,
     VWat=0.005,
     mDry=0.0001,
     nEle=5,
     fraRad=0.5,
-    TAir_nominal=273.15 + 20.0,
+    TAir_nominal=293.15,
     n=1.3,
-    T_a_nominal=273.15 + 60.0,
-    T_b_nominal=273.15 + 40.0)
+    T_a_nominal=348.15,
+    T_b_nominal=338.15)
     "Radiator model"
     annotation (Placement(transformation(extent={{-12,-22},{8,-2}})));
   BuildingSystems.Fluid.FixedResistances.Pipe pip2(
@@ -105,7 +105,7 @@ model HeatPumpHeatingSystem
     length=1)
     "Pipe model"
     annotation (Placement(transformation(extent={{-16,-70},{-36,-50}})));
-  Modelica.Blocks.Sources.Constant TSet(k=273.15 + 35.0)
+  Modelica.Blocks.Sources.Constant TSet(k=273.15 + 45.0)
     annotation (Placement(transformation(extent={{22,-56},{18,-52}})));
   Fluid.FixedResistances.Pipe pip3(
     redeclare package Medium = Medium1,
@@ -138,8 +138,7 @@ model HeatPumpHeatingSystem
     redeclare package Medium = Medium1,
     m_flow_nominal=m_flow_nominal)
     annotation (Placement(transformation(extent={{-84,-22},{-64,-2}})));
-  Modelica.Blocks.Sources.Constant dpSet(
-    k=150000.0)
+  Modelica.Blocks.Sources.Constant dpSet(k=200000.0)
     "Set pressure for the pump model"
     annotation (Placement(transformation(extent={{-68,6},{-72,10}})));
   Modelica.Blocks.Sources.Constant TAirSet(
@@ -151,23 +150,23 @@ model HeatPumpHeatingSystem
     annotation (Placement(transformation(extent={{-72,-46},{-60,-34}})));
   Fluid.Sources.MassFlowSource_T m_flow_eva(
     redeclare package Medium = Medium2,
-    nPorts=1,
     m_flow=0.5,
-    use_T_in=true)
-    annotation (Placement(transformation(extent={{24,-76},{16,-68}})));
+    use_T_in=true,
+    nPorts=1)
+    annotation (Placement(transformation(extent={{34,-84},{26,-76}})));
   Fluid.Sources.Boundary_pT bou_pT(
     redeclare package Medium = Medium2,
-    nPorts=1,
     p=99999,
-    T=293.15)
-    annotation (Placement(transformation(extent={{4,-4},{-4,4}},rotation=180,origin={-16,-72})));
-equation
+    T=293.15,
+    nPorts=1)
+    annotation (Placement(transformation(extent={{-4,-4},{4,4}},rotation=180,origin={20,-72})));
+equation 
    connect(ambience.toSurfacePorts, building.toAmbienceSurfacesPorts) annotation (Line(
-    points={{-8,56},{5,56}},
+    points={{-7,56},{5,56}},
     color={0,255,0},
     smooth=Smooth.None));
   connect(ambience.toAirPorts, building.toAmbienceAirPorts) annotation (Line(
-    points={{-8,48},{5,48}},
+    points={{-7,48},{5,48}},
     color={85,170,255},
     smooth=Smooth.None));
   connect(ambience.TAirRef, building.TAirAmb) annotation (Line(
@@ -207,7 +206,7 @@ equation
       color={0,127,255},
       smooth=Smooth.None));
   connect(dpSet.y,pump. dp_in) annotation (Line(
-      points={{-72.2,8},{-74.2,8},{-74.2,0}},
+      points={{-72.2,8},{-74,8},{-74,0}},
       color={0,0,127},
       smooth=Smooth.None));
   connect(thermostat.y,val. y) annotation (Line(
@@ -237,19 +236,20 @@ equation
   connect(TAmb.port, pip2.heatPort) annotation (Line(points={{-60,-40},{-60,-40},
           {-26,-40},{-26,-55}}, color={191,0,0}));
   connect(rad.heatPortRad, building.radHeatSourcesPorts[1]) annotation (Line(
-     points={{0,-4.8},{0,-4.8},{0,68},{17,68},{17,62}}, color={191,0,0}));
+     points={{0,-4.8},{0,-4.8},{0,68},{16,68},{16,62}}, color={191,0,0}));
 
   connect(pip2.port_a, heaPum.port_b1) annotation (Line(points={{-16,-60},{-12,-60},
           {-8,-60}}, color={0,127,255}));
   connect(heaPum.port_a1, pip1.port_b) annotation (Line(points={{12,-60},{38,-60},
           {38,-12},{32,-12}}, color={0,127,255}));
-  connect(heaPum.port_b2, m_flow_eva.ports[1])
-    annotation (Line(points={{12,-72},{14,-72},{16,-72}}, color={0,127,255}));
-  connect(bou_pT.ports[1], heaPum.port_a2) annotation (Line(points={{-12,-72},{-10,
-          -72},{-8,-72}}, color={0,127,255}));
-  connect(ambience.TAirRef, m_flow_eva.T_in) annotation (Line(points={{-25,59},{-32,
-          59},{-32,70},{56,70},{56,-70.4},{24.8,-70.4}}, color={0,0,127}));
+  connect(ambience.TAirRef, m_flow_eva.T_in) annotation (Line(points={{-25,59},{
+          -26,59},{-26,64},{18,64},{18,70},{32,70},{32,72},{52,72},{52,-78.4},{34.8,
+          -78.4}},                                       color={0,0,127}));
 
+  connect(heaPum.port_a2, m_flow_eva.ports[1]) annotation (Line(points={{-8,-72},
+          {-14,-72},{-14,-80},{26,-80}}, color={0,127,255}));
+  connect(heaPum.port_b2, bou_pT.ports[1])
+    annotation (Line(points={{12,-72},{16,-72}}, color={0,127,255}));
   annotation(experiment(StartTime=0, StopTime=31536000),
     __Dymola_Commands(file="modelica://BuildingSystems/Resources/Scripts/Dymola/Applications/HeatingSystems/HeatPumpHeatingSystem.mos" "Simulate and plot"),
     Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,100}}),
