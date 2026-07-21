@@ -29,7 +29,7 @@ model Sandbox "Validation of BorefieldOneUTube based on the experiment of Beier 
     redeclare package Medium = Medium,
     T_start=T_start,
     addPowerToMedium=false,
-    use_inputFilter=false,
+    use_riseTime=false,
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
     m_flow_nominal=borFieDat.conDat.mBorFie_flow_nominal,
     nominalValuesDefineDefaultPressureCurve=true,
@@ -57,11 +57,11 @@ model Sandbox "Validation of BorefieldOneUTube based on the experiment of Beier 
     nPorts=1) "Sink"
     annotation (Placement(transformation(extent={{60,0},{80,20}})));
   Modelica.Blocks.Sources.CombiTimeTable sandBoxMea(
-    tableOnFile=true,
-    tableName="data",
-    offset={0,0,0},
-    columns={2,3,4},
-    fileName=Modelica.Utilities.Files.loadResource(
+    final tableOnFile=true,
+    final tableName="data",
+    final offset={0,0,0},
+    final columns={2,3,4},
+    final fileName=Modelica.Utilities.Files.loadResource(
       "modelica://BuildingSystems/Resources/Data/Fluid/Geothermal/Borefields/HeatTransfer/Validation/Beier_Smith_Spitler_2011_SandBox.txt"))
     annotation (Placement(transformation(extent={{-90,-10},{-70,10}})));
   BuildingSystems.Fluid.HeatExchangers.HeaterCooler_u hea(
@@ -128,6 +128,12 @@ spectral method to simulate borehole heat exchanger</i>. Geothermics 51:
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+April 29, 2026, by Michael Wetter:<br/>
+Changed configuration of table to cause the parameters to be evaluated, as this leads to more efficient code.<br/>
+This is for
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/2111\">IBPSA, #2111</a>.
+</li>
 <li>
 November 15, 2022, by Michael Wetter:<br/>
 Set proper head for pump.<br/>

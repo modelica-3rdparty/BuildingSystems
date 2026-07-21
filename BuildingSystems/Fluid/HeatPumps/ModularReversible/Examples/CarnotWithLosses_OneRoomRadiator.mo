@@ -1,18 +1,20 @@
 within BuildingSystems.Fluid.HeatPumps.ModularReversible.Examples;
 model CarnotWithLosses_OneRoomRadiator
   "Reversible heat pump with Carnot approach connected to a simple room model with radiator"
-  extends Examples.BaseClasses.PartialOneRoomRadiator(
+  extends BuildingSystems.Fluid.HeatPumps.ModularReversible.Examples.BaseClasses.PartialOneRoomRadiator(
     mEva_flow_nominal=heaPum.mEva_flow_nominal,
     mCon_flow_nominal=heaPum.mCon_flow_nominal,
     sin(nPorts=1),
-    booToReaPumEva(realTrue=heaPum.mEva_flow_nominal));
+    booToReaPumEva(realTrue=heaPum.mEva_flow_nominal),
+    pumHeaPumSou(dp_nominal=heaPum.dpEva_nominal),
+    pumHeaPum(dp_nominal=heaPum.dpCon_nominal));
   extends Modelica.Icons.Example;
 
-  parameter Real perHeaLos=0.1
+  parameter Real perHeaLos=0.01
     "Percentage of heat losses in the heat exchangers to the nominal heating output";
   BuildingSystems.Fluid.HeatPumps.ModularReversible.CarnotWithLosses heaPum(
     redeclare package MediumCon = MediumWat,
-    redeclare package MediumEva = MediumWat,
+    redeclare package MediumEva = MediumEva,
     QHea_flow_nominal=Q_flow_nominal,
     use_rev=true,
     use_intSafCtr=true,
@@ -31,10 +33,9 @@ model CarnotWithLosses_OneRoomRadiator
     TConCoo_nominal=oneRooRadHeaPumCtr.TRadMinSup,
     TEvaCoo_nominal=sou.T + 10,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
-    redeclare BuildingSystems.Fluid.HeatPumps.ModularReversible.Controls.Safety.Data.Wuellhorst2021
-      safCtrPar,
+    redeclare BuildingSystems.Fluid.HeatPumps.ModularReversible.Controls.Safety.Data.Wuellhorst2021 safCtrPar,
     etaCarnot_nominal=0.4)
-              "Reversible heat pump with losses and Carnot approach"
+      "Reversible heat pump with losses and Carnot approach"
     annotation (Placement(transformation(extent={{20,-160},{0,-140}})));
   Modelica.Blocks.Sources.Constant temAmbBas(final k(
       final unit="K",
@@ -89,6 +90,12 @@ equation
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+March 7, 2025, by Michael Wetter:<br/>
+Introduced medium <code>MediumEva</code> and refactored medium assignment
+as the model replaced non-replaceable medium bindings.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/1981\">#1981</a>.
+</li>
 <li>
   <i>October 2, 2022</i> by Fabian Wuellhorst:<br/>
   First implementation (see issue <a href=

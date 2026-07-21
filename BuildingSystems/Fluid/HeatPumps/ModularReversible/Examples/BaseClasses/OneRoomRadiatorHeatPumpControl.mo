@@ -77,7 +77,7 @@ model OneRoomRadiatorHeatPumpControl
         origin={90,-10})));
   Modelica.Blocks.Logical.Hysteresis hysSecCoo(
     final uLow=TRadMinSup,
-    final uHigh=TRadMinSup + 1,
+    final uHigh=TRadMinSup + 4,
     final pre_y_start=false)
             if witCoo
     "Hysteresis for avoiding temperatures below 15 °C when cooling"
@@ -194,6 +194,11 @@ equation
 </html>", revisions="<html>
 <ul>
 <li>
+  <i>July 15, 2024</i> by Fabian Wuellhorst:<br/>
+  Adjust hysteresis bandwidth (see issue
+  <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/1908\">IBPSA #1908</a>)
+</li>
+<li>
   <i>October 2, 2022</i> by Fabian Wuellhorst:<br/>
   First implementation (see issue <a href=
   \"https://github.com/ibpsa/modelica-ibpsa/issues/1576\">#1576</a>)
@@ -204,8 +209,6 @@ equation
       Text(
           extent={{-153,163},{147,123}},
           textColor={0,0,255},
-          fillPattern=FillPattern.HorizontalCylinder,
-          fillColor={0,127,255},
           textString="%name"),
         Rectangle(
           extent={{-120,120},{120,-120}},

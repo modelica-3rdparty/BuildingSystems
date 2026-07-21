@@ -3,11 +3,13 @@ model Modular_OneRoomRadiator
   "Modular reversible heat pump connected to a simple room model with radiator"
   extends
     BuildingSystems.Fluid.HeatPumps.ModularReversible.Examples.BaseClasses.PartialOneRoomRadiator(
+    redeclare package MediumEva = MediumAir,
     mEva_flow_nominal=heaPum.mEva_flow_nominal,
-    sin(nPorts=1, redeclare package Medium = MediumAir),
-    pumHeaPumSou(redeclare package Medium = MediumAir),
-    sou(redeclare package Medium = MediumAir),
-    booToReaPumEva(realTrue=heaPum.mEva_flow_nominal));
+    sin(nPorts=1),
+    pumHeaPumSou(
+      dp_nominal=heaPum.dpEva_nominal),
+    booToReaPumEva(realTrue=heaPum.mEva_flow_nominal),
+    pumHeaPum(dp_nominal=heaPum.dpCon_nominal));
   extends Modelica.Icons.Example;
 
   BuildingSystems.Fluid.HeatPumps.ModularReversible.Modular heaPum(
@@ -28,38 +30,37 @@ model Modular_OneRoomRadiator
     GConOut=100,
     GConIns=1000,
     TEvaHea_nominal=sou.T,
-    TEvaCoo_nominal=sou.T,
+    TEvaCoo_nominal=303.15,
     dTEva_nominal=2,
     dpEva_nominal(displayUnit="Pa") = 200,
     use_evaCap=false,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     redeclare model RefrigerantCycleHeatPumpHeating =
-        BuildingSystems.Fluid.HeatPumps.ModularReversible.RefrigerantCycle.ConstantCarnotEffectiveness
-        (
+      BuildingSystems.Fluid.HeatPumps.ModularReversible.RefrigerantCycle.ConstantCarnotEffectiveness(
         redeclare
           BuildingSystems.Fluid.HeatPumps.ModularReversible.RefrigerantCycle.Frosting.NoFrosting
           iceFacCal,
         TAppCon_nominal=0,
         TAppEva_nominal=0),
     redeclare model RefrigerantCycleHeatPumpCooling =
-        BuildingSystems.Fluid.Chillers.ModularReversible.RefrigerantCycle.TableData2D (
+      BuildingSystems.Fluid.Chillers.ModularReversible.RefrigerantCycle.TableData2D(
         redeclare
           BuildingSystems.Fluid.HeatPumps.ModularReversible.RefrigerantCycle.Frosting.NoFrosting
           iceFacCal,
         mCon_flow_nominal=heaPum.mCon_flow_nominal,
         mEva_flow_nominal=heaPum.mEva_flow_nominal,
         datTab=BuildingSystems.Fluid.Chillers.ModularReversible.Data.TableData2D.EN14511.Vitocal251A08()),
-    redeclare BuildingSystems.Fluid.HeatPumps.ModularReversible.Controls.Safety.Data.Wuellhorst2021
-      safCtrPar(
+    redeclare BuildingSystems.Fluid.HeatPumps.ModularReversible.Controls.Safety.Data.Wuellhorst2021 safCtrPar(
       use_TConOutHea=true,
       use_TEvaOutHea=false,
       use_antFre=true,
       TAntFre=275.15),
     QCoo_flow_nominal=-Q_flow_nominal*0.5)
-                       "Modular reversible heat pump"
+      "Modular reversible heat pump"
     annotation (Placement(transformation(extent={{20,-160},{0,-140}})));
 
-  Modelica.Blocks.Sources.Constant temAmbBas(final k(
+  Modelica.Blocks.Sources.Constant temAmbBas(
+    final k(
       final unit="K",
       displayUnit="degC") = 291.15)
     "Ambient temperature in basement of building" annotation (Placement(
@@ -106,6 +107,17 @@ equation
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+May 23, 2025, by Michael Wetter:<br/>
+Changed nominal temperature during reverse mode so that heat pump has a positive lift.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/2013\">IBPSA, #2013</a>.
+</li>
+<li>
+March 7, 2025, by Michael Wetter:<br/>
+Introduced medium <code>MediumEva</code> and refactored medium assignment
+as the model replaced non-replaceable medium bindings.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/1981\">#1981</a>.
+</li>
 <li>
   May 2, 2024, by Michael Wetter:<br/>
   Refactored check for device identifiers.<br/>

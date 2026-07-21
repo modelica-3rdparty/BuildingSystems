@@ -35,7 +35,8 @@ model ConservationEquation "Lumped volume with mass and energy balance"
 
   // Outputs that are needed in models that use this model
   Modelica.Blocks.Interfaces.RealOutput hOut(unit="J/kg",
-                                             start=hStart)
+                                             start=hStart,
+                                             nominal=Medium.h_default)
     "Leaving specific enthalpy of the component"
      annotation (Placement(transformation(extent={{-10,-10},{10,10}},
         rotation=90,
@@ -70,7 +71,9 @@ model ConservationEquation "Lumped volume with mass and energy balance"
         origin={110,-60})));
 
   Modelica.Fluid.Vessels.BaseClasses.VesselFluidPorts_b ports[nPorts](
-      redeclare each final package Medium = Medium) "Fluid inlets and outlets"
+      redeclare each final package Medium = Medium,
+      each h_outflow(nominal=Medium.h_default),
+      each Xi_outflow(each nominal=0.01)) "Fluid inlets and outlets"
     annotation (Placement(transformation(extent={{-40,-10},{40,10}},
       origin={0,-100})));
 
@@ -93,9 +96,16 @@ model ConservationEquation "Lumped volume with mass and energy balance"
         X=X_start[1:Medium.nXi])) + (T_start - Medium.reference_T)*CSen,
       nominal=1E5) "Internal energy of fluid";
 
-  Modelica.Units.SI.Mass m(start=fluidVolume*rho_start, stateSelect=if
-        massDynamics == Modelica.Fluid.Types.Dynamics.SteadyState then
-        StateSelect.default else StateSelect.prefer) "Mass of fluid";
+  Modelica.Units.SI.Mass m(
+    start=fluidVolume*rho_start,
+    stateSelect=
+    if massDynamics == Modelica.Fluid.Types.Dynamics.SteadyState
+      then
+        StateSelect.default
+      else
+        StateSelect.prefer,
+    nominal=fluidVolume*rho_start)
+    "Mass of fluid";
 
   Modelica.Units.SI.Mass[Medium.nXi] mXi(
     each stateSelect=StateSelect.never,
@@ -427,6 +437,17 @@ BuildingSystems.Fluid.MixingVolumes.MixingVolume</a>.
 </html>", revisions="<html>
 <ul>
 <li>
+June 25, 2026, by Michael Wetter:<br/>
+Added <code>nominal</code> attribute to <code>m</code>.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/2163\">IBPSA, #2163</a>.
+</li>
+<li>
+June 18, 2024, by Michael Wetter:<br/>
+Added <code>start</code> and <code>nominal</code> attributes
+to avoid warnings in OpenModelica due to conflicting values.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/1890\">IBPSA, #1890</a>.
+</li>
+<li>
 October 24, 2022, by Michael Wetter:<br/>
 Conditionally removed assertion that checks for water content as this is
 only required if water is added to the medium.<br/>
@@ -561,7 +582,7 @@ The model requires derivatives of some inputs as listed below:
 1 inlet.p
 </pre>
 when translating
-<code>Buildings.Fluid.FMI.ExportContainers.Examples.FMUs.HeaterCooler_u</code>
+<code>BuildingSystems.Fluid.FMI.ExportContainers.Examples.FMUs.HeaterCooler_u</code>
 with a dynamic energy balance.
 </li>
 <li>

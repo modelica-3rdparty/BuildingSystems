@@ -42,7 +42,7 @@ model ThermalZoneHVACNoExhaust
     dp_nominal=1200,
     inputType=BuildingSystems.Fluid.Types.InputType.Constant,
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
-    use_inputFilter=false) "Fan or pump"
+    use_riseTime=false) "Fan or pump"
     annotation (Placement(transformation(extent={{-90,0},{-70,20}})));
   HeatExchangers.HeaterCooler_u
     hea(
@@ -147,7 +147,6 @@ equation
           pattern=LinePattern.None),
         Text(
           extent={{-190,124},{-152,100}},
-          pattern=LinePattern.None,
           textColor={0,0,127},
           horizontalAlignment=TextAlignment.Left,
           textString="Simplified model of
@@ -156,7 +155,6 @@ in Modelica that could
 be exposed as an FMU"),
         Text(
           extent={{90,118},{128,94}},
-          pattern=LinePattern.None,
           textColor={0,0,127},
           horizontalAlignment=TextAlignment.Left,
           textString="Simplified model of

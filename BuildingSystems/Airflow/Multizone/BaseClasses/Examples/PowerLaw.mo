@@ -24,7 +24,7 @@ __Dymola_Commands(file="modelica://BuildingSystems/Resources/Scripts/Dymola/Airf
 <p>
 This examples demonstrates the
 <a href=\"modelica://BuildingSystems.Airflow.Multizone.BaseClasses.powerLaw\">
-Buildings.Airflow.Multizone.BaseClasses.powerLaw</a>
+BuildingSystems.Airflow.Multizone.BaseClasses.powerLaw</a>
 function.
 </p>
 </html>", revisions="<html>

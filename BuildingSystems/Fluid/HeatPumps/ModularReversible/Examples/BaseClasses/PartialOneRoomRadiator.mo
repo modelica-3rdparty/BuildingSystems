@@ -5,7 +5,10 @@ partial model PartialOneRoomRadiator
       BuildingSystems.Media.Air "Medium model for air";
   replaceable package MediumWat =
       BuildingSystems.Media.Water "Medium model for water";
-
+  replaceable package MediumEva =
+    BuildingSystems.Media.Water
+    constrainedby Modelica.Media.Interfaces.PartialMedium
+    "Medium model for evaporator-side fluid";
   parameter Modelica.Units.SI.HeatFlowRate Q_flow_nominal=20000
     "Nominal heat flow rate of radiator";
   parameter Modelica.Units.SI.Temperature TRadSup_nominal=273.15 + 50
@@ -29,8 +32,8 @@ partial model PartialOneRoomRadiator
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal=mAirRoo_flow_nominal,
     V=V) annotation (Placement(transformation(extent={{60,20},{80,40}})));
-  Modelica.Thermal.HeatTransfer.Components.ThermalConductor theCon(G=
-        Q_flow_nominal/40)
+  Modelica.Thermal.HeatTransfer.Components.ThermalConductor theCon(
+    G=Q_flow_nominal/40)
     "Thermal conductance with the ambient"
     annotation (Placement(transformation(extent={{20,40},{40,60}})));
   Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHea
@@ -71,13 +74,12 @@ partial model PartialOneRoomRadiator
 
 //----------------------------------------------------------------------------//
 
-  Movers.FlowControlled_m_flow pumHeaPum(
+  replaceable BuildingSystems.Fluid.Movers.Preconfigured.FlowControlled_m_flow pumHeaPum(
     redeclare package Medium = MediumWat,
-    nominalValuesDefineDefaultPressureCurve=true,
     m_flow_nominal=mCon_flow_nominal,
-    m_flow_start=0.85,
+    m_flow_start=mCon_flow_nominal,
     T_start=TRadSup_nominal,
-    use_inputFilter=false,
+    use_riseTime=false,
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState)
     "Pump for radiator side" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
@@ -97,8 +99,8 @@ partial model PartialOneRoomRadiator
 //------------------------------------------------------------------------------------//
 
   BuildingSystems.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(filNam=
-        Modelica.Utilities.Files.loadResource(
-        "modelica://BuildingSystems/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos"))
+    Modelica.Utilities.Files.loadResource(
+      "modelica://BuildingSystems/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos"))
     "Weather data reader"
     annotation (Placement(transformation(extent={{-220,40},{-200,60}})));
   BuildingSystems.BoundaryConditions.WeatherData.Bus weaBus "Weather data bus"
@@ -109,28 +111,29 @@ partial model PartialOneRoomRadiator
 
 //--------------------------------------------------------------------------------------//
 
-  Movers.FlowControlled_m_flow pumHeaPumSou(
-    redeclare package Medium = MediumWat,
-    m_flow_start=0.85,
+  BuildingSystems.Fluid.Movers.Preconfigured.FlowControlled_m_flow pumHeaPumSou(
+    redeclare package Medium = MediumEva,
+    m_flow_start=mEva_flow_nominal,
     m_flow_nominal=mEva_flow_nominal,
-    use_inputFilter=false,
+    use_riseTime=false,
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState)
     "Pump for heat pump source side" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={-30,-180})));
-  Modelica.Blocks.Math.BooleanToReal booToReaPumCon(realTrue=mCon_flow_nominal,
-      y(start=0)) "Pump signal" annotation (Placement(transformation(
+  Modelica.Blocks.Math.BooleanToReal booToReaPumCon(
+    realTrue=mCon_flow_nominal,
+    y(start=0)) "Pump signal" annotation (Placement(transformation(
         extent={{10,-10},{-10,10}},
         rotation=180,
         origin={-110,-110})));
   BuildingSystems.Fluid.Sources.Boundary_pT sou(
-    redeclare package Medium = MediumWat,
+    redeclare package Medium = MediumEva,
     T=281.15,
     nPorts=1) "Fluid source on source side"
     annotation (Placement(transformation(extent={{-80,-210},{-60,-190}})));
   BuildingSystems.Fluid.Sources.Boundary_pT sin(
-    redeclare package Medium = MediumWat,
+    redeclare package Medium = MediumEva,
     T=283.15) "Fluid sink on source side"
     annotation (Placement(transformation(extent={{80,-210},{60,-190}})));
   BuildingSystems.Fluid.Sources.Boundary_pT preSou(
@@ -205,7 +208,7 @@ equation
       color={255,204,51},
       thickness=0.5,
       smooth=Smooth.None), Text(
-      textString="%second",
+      string="%second",
       index=1,
       extent={{6,3},{6,3}}));
   connect(weaBus.TDryBul, TOut.T) annotation (Line(
@@ -213,7 +216,7 @@ equation
       color={255,204,51},
       thickness=0.5,
       smooth=Smooth.None), Text(
-      textString="%first",
+      string="%first",
       index=-1,
       extent={{-6,3},{-6,3}}));
   connect(TOut.port, theCon.port_a) annotation (Line(
@@ -264,6 +267,12 @@ equation
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+March 7, 2025, by Michael Wetter:<br/>
+Introduced medium <code>MediumEva</code> and refactored medium assignment
+as the model replaced non-replaceable medium bindings.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/1981\">#1981</a>.
+</li>
 <li>
   <i>October 2, 2022</i> by Fabian Wuellhorst:<br/>
   First implementation (see issue <a href=
